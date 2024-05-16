@@ -106,11 +106,12 @@ public class Controller1 : MonoBehaviour
 
     void readyfunc()
     {
-        while (ptr != 0)
+        while (ptr < 4)
         {
-            backfunc();
+            nextfunc();
         }
         canva.SetActive(false);
+        this.GetComponent<Controller2>().enabled=true;
     }
 
 
