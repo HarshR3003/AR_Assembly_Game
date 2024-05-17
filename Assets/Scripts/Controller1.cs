@@ -5,12 +5,14 @@ using UnityEngine.UI;
 
 public class Controller1 : MonoBehaviour
 {
-    public Button next, back, ready;
+    public Button next, back, ready, help;
     public GameObject canva;
+    public GameObject htext;
     public GameObject core;
     public GameObject[] faces;
     public GameObject[] edges;
     public GameObject[] vertices;
+    public float speed = 0.01f;
 
     int ptr;
 
@@ -19,6 +21,8 @@ public class Controller1 : MonoBehaviour
         next.onClick.AddListener(nextfunc);
         back.onClick.AddListener(backfunc);
         ready.onClick.AddListener(readyfunc);
+        help.onClick.AddListener(helpfunc);
+        htext.SetActive(false);
         ptr = 0;
     }
 
@@ -30,7 +34,7 @@ public class Controller1 : MonoBehaviour
             {
                 Vector3 pos = vertices[i].transform.position;
                 pos = pos + pos;
-                vertices[i].transform.position = Vector3.Lerp(vertices[i].transform.position, pos, 50);
+                vertices[i].transform.position = Vector3.MoveTowards(vertices[i].transform.position, pos, speed);
             }
             ptr++;
         }
@@ -40,7 +44,7 @@ public class Controller1 : MonoBehaviour
             {
                 Vector3 pos = edges[i].transform.position;
                 pos = pos + pos;
-                edges[i].transform.position = Vector3.Lerp(edges[i].transform.position, pos, 50);
+                edges[i].transform.position = Vector3.MoveTowards(edges[i].transform.position, pos, speed);
             }
             ptr++;
         }
@@ -50,7 +54,7 @@ public class Controller1 : MonoBehaviour
             {
                 Vector3 pos = faces[i].transform.position;
                 pos = pos + pos;
-                faces[i].transform.position = Vector3.Lerp(faces[i].transform.position, pos, 50);
+                faces[i].transform.position = Vector3.MoveTowards(faces[i].transform.position, pos, speed);
             }
             ptr++;
         }
@@ -58,7 +62,7 @@ public class Controller1 : MonoBehaviour
         {
             Vector3 pos = core.transform.position;
             pos.z = pos.z + 1;
-            core.transform.position = Vector3.Lerp(core.transform.position, pos, 50);
+            core.transform.position = Vector3.MoveTowards(core.transform.position, pos, speed);
             ptr++;
         }
     }
@@ -71,7 +75,7 @@ public class Controller1 : MonoBehaviour
             {
                 Vector3 pos = vertices[i].transform.position;
                 pos = pos/2;
-                vertices[i].transform.position = Vector3.Lerp(vertices[i].transform.position, pos, 50);
+                vertices[i].transform.position = Vector3.MoveTowards(vertices[i].transform.position, pos, speed);
             }
             ptr--;
         }
@@ -81,7 +85,7 @@ public class Controller1 : MonoBehaviour
             {
                 Vector3 pos = edges[i].transform.position;
                 pos = pos/2;
-                edges[i].transform.position = Vector3.Lerp(edges[i].transform.position, pos, 50);
+                edges[i].transform.position = Vector3.MoveTowards(edges[i].transform.position, pos, speed);
             }
             ptr--;
         }
@@ -91,7 +95,7 @@ public class Controller1 : MonoBehaviour
             {
                 Vector3 pos = faces[i].transform.position;
                 pos = pos/2;
-                faces[i].transform.position = Vector3.Lerp(faces[i].transform.position, pos, 50);
+                faces[i].transform.position = Vector3.MoveTowards(faces[i].transform.position, pos, speed);
             }
             ptr--;
         }
@@ -99,20 +103,32 @@ public class Controller1 : MonoBehaviour
         {
             Vector3 pos = core.transform.position;
             pos.z = pos.z - 1;
-            core.transform.position = Vector3.Lerp(core.transform.position, pos, 50);
+            core.transform.position = Vector3.MoveTowards(core.transform.position, pos, speed);
             ptr--;
         }
     }
 
     void readyfunc()
     {
-        while (ptr != 0)
+        while (ptr < 4)
         {
-            backfunc();
+            nextfunc();
         }
         canva.SetActive(false);
+        this.GetComponent<Controller2>().enabled=true;
     }
 
+    void helpfunc()
+    {
+        if (htext.active)
+        {
+            htext.SetActive(false);
+        }
+        else
+        {
+            htext.SetActive(true);
+        }
+    }
 
     void Update()
     {
