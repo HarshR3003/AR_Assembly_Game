@@ -2,20 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
+using static System.Net.Mime.MediaTypeNames;
 
 public class Controller1 : MonoBehaviour
 {
-    public Button next, back, ready, help;
-    public GameObject canva;
-    public GameObject htext;
     public GameObject core;
     public GameObject[] faces;
     public GameObject[] edges;
     public GameObject[] vertices;
-    public float speed = 1.0f;
 
     public Button helpA;
     public GameObject CanvaA;
@@ -25,8 +23,6 @@ public class Controller1 : MonoBehaviour
     public Button again, quit;
     public GameObject canvaQ;
 
-    int ptr;
-    bool nextStage;
     Vector3[] vposo;
     Vector3[] vposf;
     Vector3[] eposo;
@@ -36,27 +32,27 @@ public class Controller1 : MonoBehaviour
     Vector3 cposo;
     Vector3 cposf;
 
+    bool move, rbool;
     bool b1, b2, b3, b4, bw;
+    bool vf, ef, ff, cf, vb, eb, fb, cb;
     List<int> stat;
+
+    float elapsedTime = 0f;
+    float duration = 2f;
+    float percentage;
 
     void Start()
     {
-        nextStage = false;
+        this.GetComponent<Controllerx>().enabled = false;
 
-        Debug.Log("Hi fam");
-        next.onClick.AddListener(nextfunc);
-        back.onClick.AddListener(backfunc);
-        ready.onClick.AddListener(readyfunc);
-        help.onClick.AddListener(helpfunc);
+        Debug.Log("Hi fam 1");
         helpA.onClick.AddListener(helpfunc2);
         again.onClick.AddListener(againfunc);
         quit.onClick.AddListener(quitfunc);
-        htext.SetActive(false);
-        CanvaA.SetActive(false);
+        CanvaA.SetActive(true);
         htextA.SetActive(false);
         warning.SetActive(false);
         canvaQ.SetActive(false);
-        ptr = 0;
 
         vposo = new Vector3[8];
         vposf = new Vector3[8];
@@ -65,190 +61,34 @@ public class Controller1 : MonoBehaviour
         fposo = new Vector3[6];
         fposf = new Vector3[6];
 
-        b1 = true;
-        b2 = true;
-        b3 = true;
-        b4 = true;
-        bw = false;
+        move = true; bw = false;
+        b1 = false; b2 = false; b3 = false; b4 = false;
+        vf = false; ef = false; ff = false; cf = false; vb = false; eb = false; fb = false; cb = false;
 
         stat = new List<int>();
-        stat.Add(0); stat.Add(1); stat.Add(2); stat.Add (3); stat.Add(4);
+        stat.Add(0);
 
         for(int i = 0; i < vertices.Length; i++)
         {
-            vposo[i] = 1 * vertices[i].transform.position;
-            vposf[i] = 2 * vertices[i].transform.position;
+            vposo[i] = vertices[i].transform.position / 2;
+            vposf[i] = vertices[i].transform.position;
         }
 
         for (int i = 0; i < edges.Length; i++)
         {
-            eposo[i] = 1 * edges[i].transform.position;
-            eposf[i] = 2 * edges[i].transform.position;
+            eposo[i] = edges[i].transform.position / 2;
+            eposf[i] = edges[i].transform.position;
         }
 
         for (int i = 0; i < faces.Length; i++)
         {
-            fposo[i] = 1 * faces[i].transform.position;
-            fposf[i] = 2 * faces[i].transform.position;
+            fposo[i] = faces[i].transform.position / 2;
+            fposf[i] = faces[i].transform.position;
         }
 
         cposo = core.transform.position;
         cposf = core.transform.position;
-        cposf.y = core.transform.position.y + 1;
-    }
-
-    void fvertices()
-    {
-        //Debug.Log("fvertices");
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i].transform.position = vposf[i];
-        }
-        b1 = false;
-        stat.Remove(4);
-    }
-
-    void fedges()
-    {
-        //Debug.Log("fedges");
-        for (int i = 0; i < edges.Length; i++)
-        {
-            edges[i].transform.position = eposf[i];
-        }
-        b2 = false;
-        stat.Remove(3);
-    }
-
-    void ffaces()
-    {
-        //Debug.Log("ffaces");
-        for (int i = 0; i < faces.Length; i++)
-        {
-            faces[i].transform.position = fposf[i];
-        }
-        b3 = false;
-        stat.Remove(2);
-    }
-
-    void fcore()
-    {
-        //Debug.Log("fcore");
-        core.transform.position = cposf;
-        b4 = false;
-        stat.Remove(1);
-    }
-
-    void bvertices()
-    {
-        //Debug.Log("bvertices");
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i].transform.position = vposo[i];
-        }
-        b1 = true;
-        stat.Add(4);
-    }
-
-    void bedges()
-    {
-        //Debug.Log("bedges");
-        for (int i = 0; i < edges.Length; i++)
-        {
-            edges[i].transform.position = eposo[i];
-        }
-        b2 = true;
-        stat.Add(3);
-    }
-
-    void bfaces()
-    {
-        //Debug.Log("bfaces");
-        for (int i = 0; i < faces.Length; i++)
-        {
-            faces[i].transform.position = fposo[i];
-        }
-        b3 = true;
-        stat.Add(2);
-    }
-
-    void bcore()
-    {
-        //Debug.Log("bcore");
-        core.transform.position = cposo;
-        b4 = true;
-        stat.Add(1);
-    }
-
-    void nextfunc()
-    {
-        Debug.Log(ptr);
-        if (ptr == 0)
-        {
-            fvertices();
-            ptr++;
-        }
-        else if (ptr == 1)
-        {
-            fedges();
-            ptr++;
-        }
-        else if (ptr == 2)
-        {
-            ffaces();
-            ptr++;
-        }
-        else if(ptr == 3)
-        {
-            fcore();
-            ptr++;
-        }
-    }
-
-    void backfunc()
-    {
-        if (ptr == 1)
-        {
-            bvertices();
-            ptr--;
-        }
-        else if (ptr == 2)
-        {
-            bedges();
-            ptr--;
-        }
-        else if (ptr == 3)
-        {
-            bfaces();
-            ptr--;
-        }
-        else if (ptr == 4)
-        {
-            bcore();
-            ptr--;
-        }
-    }
-
-    void readyfunc()
-    {
-        while (ptr < 4)
-        {
-            nextfunc();
-        }
-        canva.SetActive(false);
-        CanvaA.SetActive(true);
-        nextStage = true;
-    }
-
-    void helpfunc()
-    {
-        if (htext.active)
-        {
-            htext.SetActive(false);
-        }
-        else
-        {
-            htext.SetActive(true);
-        }
+        cposo.y = core.transform.position.y - 1;
     }
 
     void helpfunc2()
@@ -263,77 +103,214 @@ public class Controller1 : MonoBehaviour
         }
     }
 
+    public void firstfuncA()
+    {
+        this.GetComponent<Controllerx>().enabled = false;
+
+        Debug.Log("Hi fam 1");
+        helpA.onClick.AddListener(helpfunc2);
+        again.onClick.AddListener(againfunc);
+        quit.onClick.AddListener(quitfunc);
+        CanvaA.SetActive(true);
+        htextA.SetActive(false);
+        warning.SetActive(false);
+        canvaQ.SetActive(false);
+
+        move = true; bw = false;
+        b1 = false; b2 = false; b3 = false; b4 = false;
+        vf = false; ef = false; ff = false; cf = false; vb = false; eb = false; fb = false; cb = false;
+    }
+
     void againfunc()
     {
-        canva.SetActive(true);
+        this.GetComponent<Controllerx>().enabled = true;
         canvaQ.SetActive(false);
-        nextStage = false;
+        CanvaA.SetActive(false);
+        this.GetComponent<Controllerx>().firstfunc();
+        stat.Clear();
+        stat.Add(0);
     }
 
     void quitfunc()
     {
-        Application.Quit();
+        UnityEngine.Device.Application.Quit();
     }
 
     void Update()
     {
-        if(nextStage)
+        bw = false;
+        for (int i = 0; i < stat.Count; i++)
         {
-            //Debug.Log("yeeeeeee");
+            if (stat[i] != i)
+            {
+                bw = true; break;
+            }
+        }
+        if (bw)
+        {
+            warning.SetActive(true);
+        }
+        else
+        {
+            warning.SetActive(false);
+            if (stat.Count == 5)
+            {
+                CanvaA.SetActive(false);
+                canvaQ.SetActive(true);
+            }
+        }
+        if (move)
+        {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Input.GetMouseButtonDown(0))
             {
-                bw = false;
                 if (Physics.Raycast(ray, out hit))
                 {
                     Vector3 pos = hit.transform.position;
                     //Debug.Log(hit.transform.position + " " + b1 + " " + b2 + " " + b3 + " " + b4);
-                    float sum = pos.x + pos.y + pos.z; 
-                    if (pos.y == 1 || (pos.x == 0 && pos.y == 0 && pos.z ==0))
+                    float sum = pos.x + pos.y + pos.z;
+                    if (pos.y == 1 || (pos.x == 0 && pos.y == 0 && pos.z == 0))
                     {
-                        if(b4) fcore();
-                        else bcore();
+                        elapsedTime = 0;
+                        if (b4) cf = true;
+                        else cb = true;
                     }
                     else if ((pos.x == 0 && pos.y == 0) || (pos.y == 0 && pos.z == 0) || (pos.z == 0 && pos.x == 0))
                     {
-                        if(b3) ffaces();
-                        else bfaces();
+                        elapsedTime = 0;
+                        if (b3) ff = true;
+                        else fb = true;
                     }
-                    else if(pos.x == 0 || pos.y == 0 || pos.z == 0)
+                    else if (pos.x == 0 || pos.y == 0 || pos.z == 0)
                     {
-                        if(b2) fedges();
-                        else bedges();
+                        elapsedTime = 0;
+                        if (b2) ef = true;
+                        else eb = true;
                     }
-                    else if(pos.x != 0 && pos.y != 0 && pos.z != 0)
+                    else if (pos.x != 0 && pos.y != 0 && pos.z != 0)
                     {
-                        if(b1) fvertices();
-                        else bvertices();
+                        elapsedTime = 0;
+                        if (b1) vf = true;
+                        else vb = true;
                     }
-                    for(int i = 0; i < stat.Count; i++)
-                    {
-                        if (stat[i] != i) bw = true;
-                    }
-                    if(bw)
-                    {
-                        warning.SetActive(true);
-                    }
-                    else
-                    {
-                        warning.SetActive (false);
-                        if(stat.Count == 5)
-                        {
-                            CanvaA.SetActive(false);
-                            canvaQ.SetActive(true);
-                        }
-                    }
-                    //hit.transform.position = hit.transform.position / 2;
-                    /*if(vertices.Contains(hit.transform.name))
-                    {
-                        Debug.Log("Mazaaaaa");
-                    }
-                    Debug.Log(hit.transform.name + " " + hit.distance);*/
                 }
+            }
+        }
+        elapsedTime += Time.deltaTime;
+        percentage = elapsedTime / duration;
+        if (vf)
+        {
+            move = false;
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].transform.position = Vector3.Lerp(vposo[i], vposf[i], percentage);
+            }
+            if (percentage >= 1)
+            {
+                move = true;
+                vf = false;
+                b1 = false;
+                stat.Remove(4);
+            }
+        }
+        if (ef)
+        {
+            move = false;
+            for (int i = 0; i < edges.Length; i++)
+            {
+                edges[i].transform.position = Vector3.Lerp(eposo[i], eposf[i], percentage);
+            }
+            if (percentage >= 1)
+            {
+                move = true;
+                ef = false;
+                b2 = false;
+                stat.Remove(3);
+            }
+        }
+        if (ff)
+        {
+            move = false;
+            for (int i = 0; i < faces.Length; i++)
+            {
+                faces[i].transform.position = Vector3.Lerp(fposo[i], fposf[i], percentage);
+            }
+            if (percentage >= 1)
+            {
+                move = true;
+                ff = false;
+                b3 = false;
+                stat.Remove(2);
+            }
+        }
+        if (cf)
+        {
+            move = false;
+            core.transform.position = Vector3.Lerp(cposo, cposf, percentage);
+            if (percentage >= 1)
+            {
+                move = true;
+                cf = false;
+                b4 = false;
+                stat.Remove(1);
+            }
+        }
+        if (vb)
+        {
+            move = false;
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].transform.position = Vector3.Lerp(vposf[i], vposo[i], percentage);
+            }
+            if (percentage >= 1)
+            {
+                move = true;
+                vb = false;
+                b1 = true;
+                stat.Add(4);
+            }
+        }
+        if (eb)
+        {
+            move = false;
+            for (int i = 0; i < edges.Length; i++)
+            {
+                edges[i].transform.position = Vector3.Lerp(eposf[i], eposo[i], percentage);
+            }
+            if (percentage >= 1)
+            {
+                move = true;
+                eb = false;
+                b2 = true;
+                stat.Add(3);
+            }
+        }
+        if (fb)
+        {
+            move = false;
+            for (int i = 0; i < faces.Length; i++)
+            {
+                faces[i].transform.position = Vector3.Lerp(fposf[i], fposo[i], percentage);
+            }
+            if (percentage >= 1)
+            {
+                move = true;
+                fb = false;
+                b3 = true;
+                stat.Add(2);
+            }
+        }
+        if (cb)
+        {
+            move = false;
+            core.transform.position = Vector3.Lerp(cposf, cposo, percentage);
+            if (percentage >= 1)
+            {
+                move = true;
+                cb = false;
+                b4 = true;
+                stat.Add(1);
             }
         }
     }
